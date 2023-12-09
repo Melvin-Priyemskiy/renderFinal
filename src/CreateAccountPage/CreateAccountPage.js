@@ -1,5 +1,28 @@
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 function CreateAccountPage() {
+
+    const navigate = useNavigate();
+
+    var token ='';
+    function CreateAccount(){
+      const data = {
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value,
+      };
+      console.log(data)
+  
+      axios.post('http://localhost:3001/api/createaccount', data).then((response) => {
+          navigate('/login');
+        console.log(response);
+      }, (error) => {
+        console.log(error);
+      });
+  
+    } 
+
+
     return (
 <div class="container-fluid">
 
@@ -24,24 +47,7 @@ function CreateAccountPage() {
 
 </div>
     );
-  }
-  
-  var token ='';
-  function CreateAccount(){
-    const data = {
-        username: document.getElementById('username').value,
-        password: document.getElementById('password').value,
-    };
-    console.log(data)
-
-    axios.post('http://localhost:3001/api/createaccount', data).then((response) => {
-      console.log(response);
-    }, (error) => {
-      console.log(error);
-    });
-
-  }
-  
+  }  
   
   export default CreateAccountPage;
   
