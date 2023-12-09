@@ -34,9 +34,14 @@ function LoginPage() {
     };
     console.log(data)
 
-    axios.post('http://localhost:3001/api/loginpage', data).then(res => {
-        console.log(res)
+    axios.post('http://localhost:3001/api/loginpage', data).then((response) => {
+      console.log(response);
+    }, (error) => {
+      console.log(error);
     });
+
+    
+
   }
   
   

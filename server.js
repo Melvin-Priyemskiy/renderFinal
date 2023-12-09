@@ -74,14 +74,30 @@ app.post('/api/loginpage', (req, res) => {
 
     connection.query('SELECT * FROM users', function (error, results, fields) {
         if (error) throw error;
-        console.log(results);
-        console.log(results.length);
+        console.log("length is this: " + results.length);
         console.log(results[0]);
-        console.log(results[0].id);
 
+        var credientalsFalse = true;
 
-          
-
+        for (let i = 0; i < results.length; i++) {
+            var dbUsername = results[i].username;
+            var dbPassword = results[i].password;
+            if(dbUsername == username && dbPassword == password)
+            {
+                credientalsFalse = false;         
+            }
+        }
+        if(credientalsFalse)
+        {    res.status(401).json({
+            success: false,
+            message: 'Invalid username or password',
+          });
+        }
+        else{
+            res.json({
+                success: true,
+                message: 'Login successful'
+              });   
+        }
     });
-
     });
