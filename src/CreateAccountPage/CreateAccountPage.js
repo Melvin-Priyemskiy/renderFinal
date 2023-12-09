@@ -3,7 +3,7 @@ function CreateAccountPage() {
     return (
 <div class="container-fluid">
 
-<h1 class="row">Login</h1>
+<h1 class="row">Create Account</h1>
 <main>
     <div class="row">
         <label for="username">Username</label>
@@ -34,9 +34,9 @@ function CreateAccountPage() {
     };
     console.log(data)
 
-    // axios.post('/api/createaccount', data).then(res => {
-    //     console.log(res)
-    // });
+    axios.post('http://localhost:3001/api/createaccount', data).then(res => {
+        console.log(res)
+    });
   }
   
   
