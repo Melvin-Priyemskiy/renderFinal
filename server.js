@@ -46,7 +46,7 @@ app.listen(port, () => {
 
 
 app.get('/', async (req, res) => {
-    connection.connect();
+    // connection.connect();
  
      connection.query('SELECT * FROM budget', function (error, results, fields) {
          connection.end();
@@ -62,10 +62,26 @@ app.post('/api/createaccount', (req, res) => {
     console.log('This is me',username, password);
     res.json({data: 'it works'});
 
-    connection.connect();
     
     connection.query('INSERT INTO users VALUES ("", ?, ?)', [username, password], function (error, results, fields) {
-         connection.end();
           if (error) throw error;
       });    
 });
+
+app.post('/api/loginpage', (req, res) => {
+    const { username, password } = req.body;
+    console.log('This is me',username, password);
+
+    connection.query('SELECT * FROM users', function (error, results, fields) {
+        if (error) throw error;
+        console.log(results);
+        console.log(results.length);
+        console.log(results[0]);
+        console.log(results[0].id);
+
+
+          
+
+    });
+
+    });
