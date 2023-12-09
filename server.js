@@ -46,8 +46,6 @@ app.listen(port, () => {
 
 
 app.get('/', async (req, res) => {
-    // connection.connect();
- 
      connection.query('SELECT * FROM budget', function (error, results, fields) {
          connection.end();
          if (error) throw error;
@@ -59,13 +57,46 @@ app.get('/', async (req, res) => {
 
 app.post('/api/createaccount', (req, res) => {
     const { username, password } = req.body;
-    console.log('This is me',username, password);
-    res.json({data: 'it works'});
 
-    
+    //make sure there there is no blank fields
+    if (username.trim() === '' || password.trim() === '') {
+        return res.status(400).json({
+            success: false,
+            message: 'Username and password are required.',
+          });      
+        } else {
+        console.log('The string is not blank.');
+      }
+
+    //make sure there is no dup username that exists
+    console.log('This is me',username, password);
+
+    connection.query('SELECT * FROM users', function (error, results, fields) {
+        if (error) throw error;
+        console.log("length is this: " + results.length);
+        console.log(results[0]);
+
+        for (let i = 0; i < results.length; i++) {
+            var dbUsername = results[i].username;
+            if(dbUsername == username)
+            {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Username already exists. Choose a different username.',
+                  });            
+            }
+        }
+        res.json({
+            success: true,
+            message: 'Account Created Successfully'
+          });   
+
+    });
+
     connection.query('INSERT INTO users VALUES ("", ?, ?)', [username, password], function (error, results, fields) {
           if (error) throw error;
       });    
+
 });
 
 app.post('/api/loginpage', (req, res) => {
@@ -94,10 +125,11 @@ app.post('/api/loginpage', (req, res) => {
           });
         }
         else{
+            //implement the token to push it to the front end
             res.json({
                 success: true,
                 message: 'Login successful'
               });   
         }
     });
-    });
+});

@@ -34,9 +34,12 @@ function CreateAccountPage() {
     };
     console.log(data)
 
-    axios.post('http://localhost:3001/api/createaccount', data).then(res => {
-        console.log(res)
+    axios.post('http://localhost:3001/api/createaccount', data).then((response) => {
+      console.log(response);
+    }, (error) => {
+      console.log(error);
     });
+
   }
   
   
