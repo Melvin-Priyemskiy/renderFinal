@@ -1,4 +1,3 @@
-// Budget API
 
 const express = require('express');
 const cors = require('cors');
@@ -8,6 +7,14 @@ const bodyParser = require('body-parser');
 const path = require('path')
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true}));
+const mysql = require('mysql');
+
+var connection = mysql.createConnection({
+    host: 'sql5.freemysqlhosting.net',
+    user: 'sql5669074',
+    password: 'vQ2NDuY21i',
+    database: 'sql5669074'
+});
 
 app.use(cors());
 
@@ -38,10 +45,27 @@ app.listen(port, () => {
 
 
 
+app.get('/', async (req, res) => {
+    connection.connect();
+ 
+     connection.query('SELECT * FROM budget', function (error, results, fields) {
+         connection.end();
+         if (error) throw error;
+         res.json(results)
+ 
+     });
+ });
 
 
 app.post('/api/createaccount', (req, res) => {
     const { username, password } = req.body;
     console.log('This is me',username, password);
     res.json({data: 'it works'});
+
+    connection.connect();
+    
+    connection.query('INSERT INTO users VALUES ("", ?, ?)', [username, password], function (error, results, fields) {
+         connection.end();
+          if (error) throw error;
+      });    
 });
