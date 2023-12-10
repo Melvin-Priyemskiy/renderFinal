@@ -175,3 +175,28 @@ app.post('/api/loginpage', (req, res) => {
         }
     });
 });
+
+
+app.post('/api/makebudget', jwtMW, (req, res) => {
+    // Access the submitted data from the React app
+    const formData = req.body.formData;
+  
+    // Process the data as needed
+    console.log('Received data from React app:', formData);
+  
+    // Send a response (adjust as needed)
+    res.json({ message: 'Data received successfully on the server.' });
+  });
+
+  app.post('/api/addexpense', jwtMW, (req, res) => {
+    const { title, budget, tag } = req.body;
+  
+    // Process the form data (e.g., save to a database, etc.)
+    console.log('Received form data:');
+    console.log('Title:', title);
+    console.log('Budget:', budget);
+    console.log('Tag:', tag);
+  
+    // Send a response (you can customize this based on your needs)
+    res.json({ message: 'Form data received successfully' });
+  });

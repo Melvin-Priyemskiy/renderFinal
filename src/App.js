@@ -10,6 +10,7 @@ import CreateAccountPage from './CreateAccountPage/CreateAccountPage'
 import BudgetPage from './BudgetPage/BudgetPage'
 import DashboardPage from './DashboardPage/DashboardPage'
 import LandingPage from './LandingPage/LandingPage'
+import ExpensePage from './ExpensePage/ExpensePage'
 
 
 
@@ -40,6 +41,7 @@ function App() {
     <Route path='/dashboard' element={<DashboardPage/>} />
     <Route path='/budgetpage' element={<BudgetPage/>} />
     <Route path='/homepage' element={<HomePage/>} />
+    <Route path='/expensepage' element={<ExpensePage/>} />
     <Route path='/' element={<LandingPage/>} />
 
     </Routes>
