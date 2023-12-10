@@ -292,4 +292,71 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
       res.status(401).json({ error: 'Unauthorized - Invalid JWT token' });
     }
   });
+
+  app.get('/api/getbudget', jwtMW, (req, res) => {
+    // Extract JWT token from the request headers
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader ? authorizationHeader.split(' ')[1] : null;
+  
+    if (!token) {
+      // Handle the case where there's no token
+      return res.status(401).json({ error: 'Unauthorized - No JWT token provided' });
+    }
+  
+    try 
+    {
+      // Verify the JWT token
+      const decoded = jwt.verify(token, secretKey); 
+      const userId = decoded.id;
+      //console.log('User ID:', userId);
+  
+
+      
+      //extract the budget from the db 
+      connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
+      {
+          if (error) throw error;
+          var size = results[0].size
+          var initialValue = ''; 
+          //console.log('hi')
+          var categoryArray = new Array(size*2).fill(initialValue);
+          var reducedCatagoryArray = new Array(size).fill(initialValue);
+          if(results.length > 1)
+          { res.status(400).json({ error: 'configure your budget again' });}
+
+            categoryArray[0] = results[0].catagory1 
+            categoryArray[1] = results[0].catagory2
+            categoryArray[2] = results[0].catagory3
+            categoryArray[3] = results[0].catagory4
+            categoryArray[4] = results[0].catagory5
+            categoryArray[5] = results[0].catagory6
+            categoryArray[6] = results[0].catagory7
+            categoryArray[7] = results[0].catagory8
+            categoryArray[8] = results[0].catagory9
+            categoryArray[9] = results[0].catagory10
+            categoryArray[10] = results[0].catagory11
+            categoryArray[11] = results[0].catagory12
+
+          for (var i = 0; i < size; i ++) 
+          {reducedCatagoryArray[i] = categoryArray[i]}
+          
+         // console.log("catagories heaaare: ",reducedCatagoryArray)
+          res.json(
+            { 
+                success: true,
+                message: 'Budget information  good sent successfully',
+                budget: reducedCatagoryArray
+            });
+      });
+
+    }
+
+     catch (error) 
+    {
+      // Handle the case where the token is invalid
+      console.error('Error decoding JWT token:', error);
+      res.status(401).json({ error: 'Unauthorized - Invalid JWT token' });
+    }
+  
+  });
   
