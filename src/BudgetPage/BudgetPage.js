@@ -4,16 +4,15 @@ import { useNavigate } from 'react-router-dom';
 
 const BudgetPage = () => {
   const navigate = useNavigate();
-  function DashboardPage()
-  {
+
+  function DashboardPage() {
     navigate('/dashboard');
   }
-  function LogoutPage()
-  {
-    localStorage.removeItem('jwt');
-    navigate('/');  
-  }
 
+  function LogoutPage() {
+    localStorage.removeItem('jwt');
+    navigate('/');
+  }
 
   // State to store budget categories
   const [budgetCategories, setBudgetCategories] = useState([{ title: '', amount: '' }]);
@@ -46,15 +45,36 @@ const BudgetPage = () => {
     });
   };
 
+  // Check for identical categories
+  const hasIdenticalCategories = () => {
+    const uniqueTitles = new Set(budgetCategories.map((category) => category.title.toLowerCase()));
+    return uniqueTitles.size !== budgetCategories.length;
+  };
+
   // Event handler for form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check for identical categories
+    if (hasIdenticalCategories()) {
+      const result = { success: false, errors: ['Identical categories are not allowed. Please make each category unique.'] };
+      setFormResult(result);
+      console.error('Form submission failed:', result);
+      return;
+    }
+
     // Check for errors
     const errors = validateForm();
-    if (errors.length === 0) {
+    const hasFilledCategory = budgetCategories.some(
+      (category) => category.title.trim() !== '' && category.amount.trim() !== ''
+    );
+
+    if (errors.length === 0 && hasFilledCategory) {
       // Process the form data
-      const result = { success: true, data: budgetCategories.filter(category => category.title || category.amount) };
+      const result = {
+        success: true,
+        data: budgetCategories.filter((category) => category.title || category.amount),
+      };
       setFormResult(result);
       console.log('Form submitted successfully:', result);
 
@@ -67,9 +87,15 @@ const BudgetPage = () => {
           return;
         }
 
+        // Round the amount field to the nearest hundredth place
+        const roundedCategories = result.data.map((category) => ({
+          ...category,
+          amount: Math.round(parseFloat(category.amount) * 100) / 100,
+        }));
+
         const response = await axios.post(
           'http://localhost:3001/api/makebudget',
-          { formData: result.data }, // Adjust the data being sent to the API as needed
+          { formData: roundedCategories }, // Adjust the data being sent to the API as needed
           {
             headers: {
               'Content-Type': 'application/json',
@@ -83,7 +109,10 @@ const BudgetPage = () => {
         console.error('Error sending POST request:', error);
       }
     } else {
-      const result = { success: false, errors };
+      const result = {
+        success: false,
+        errors: [...errors, hasFilledCategory ? '' : 'At least one category must be filled'],
+      };
       setFormResult(result);
       console.error('Form submission failed:', result);
     }
@@ -160,6 +189,9 @@ const BudgetPage = () => {
                 <li key={index}>{error}</li>
               ))}
             </ul>
+          )}
+          {hasIdenticalCategories() && (
+            <p>Identical categories are not allowed. Please make each category unique before submitting the form.</p>
           )}
         </div>
       )}

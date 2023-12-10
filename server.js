@@ -140,7 +140,8 @@ app.post('/api/loginpage', (req, res) => {
     const { username, password } = req.body;
     console.log('This is me',username, password);
 
-    connection.query('SELECT * FROM users', function (error, results, fields) {
+    connection.query('SELECT * FROM users', function (error, results, fields) 
+    {
         if (error) throw error;
         console.log("length is this: " + results.length);
         console.log(results[0]);
@@ -166,7 +167,7 @@ app.post('/api/loginpage', (req, res) => {
         }
         else{
             //implement the token to push it to the front end
-            let token = jwt.sign({id: dbID, username: username }, secretKey, {expiresIn: '3m'});
+            let token = jwt.sign({id: dbID, username: username }, secretKey, {expiresIn: '100m'});
             res.json({
                 success: true,
                 message: 'Login successful',
@@ -178,25 +179,117 @@ app.post('/api/loginpage', (req, res) => {
 
 
 app.post('/api/makebudget', jwtMW, (req, res) => {
-    // Access the submitted data from the React app
-    const formData = req.body.formData;
+    // Extract JWT token from the request headers
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader ? authorizationHeader.split(' ')[1] : null;
   
-    // Process the data as needed
-    console.log('Received data from React app:', formData);
+    if (!token) {
+      // Handle the case where there's no token
+      return res.status(401).json({ error: 'Unauthorized - No JWT token provided' });
+    }
   
-    // Send a response (adjust as needed)
-    res.json({ message: 'Data received successfully on the server.' });
+    try {
+      // Verify the JWT token
+      const decoded = jwt.verify(token, secretKey); // Replace with your actual secret key
+  
+      // Now, you can access the user information from the decoded token
+      const userId = decoded.id;
+      console.log('User ID:', userId);
+  
+      // Access the submitted data from the React app
+      const formData = req.body.formData;
+  
+      // Process the data as needed
+      console.log('Received data from React app:', formData);
+      console.log('Received data from React app:', formData[0].title);
+
+      var numberOfBudgets = formData.length;
+      const sqlC = Array.from({ length: 12 }, () => null);
+      const sqlA = Array.from({ length: 12 }, () => null);
+
+
+      for (let i = 0; i < numberOfBudgets; i++) 
+      {
+        sqlA[i] = formData[i].amount;
+        sqlC[i] = formData[i].title;
+      }
+
+      console.log(sqlC);
+      console.log(sqlA)
+      
+
+  
+      // Send a response (adjust as needed)
+
+      connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) {
+        if (error) throw error;
+        console.log(typeof results); // Outputs: 'string'
+        console.log(Object.keys(results).length === 0); // Outputs: true
+        var objisEmpty = Object.keys(results).length
+
+        if(objisEmpty == 0)
+        {
+                connection.query('INSERT INTO userbudget VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                 [userId,numberOfBudgets,sqlC[0], sqlA[0], sqlC[1], sqlA[1], sqlC[2], sqlA[2], sqlC[3], sqlA[3], sqlC[4], sqlA[4], sqlC[5], sqlA[5], sqlC[6], sqlA[6], sqlC[7], sqlA[7], sqlC[8], sqlA[8], sqlC[9], sqlA[9], sqlC[10], sqlA[10], sqlC[11], sqlA[11]], function (error, results, fields) {
+          if (error) throw error;
+      });   
+        }
+        else{
+
+            //DELETE FROM your_table_name_here WHERE userid = 1;
+
+            connection.query('DELETE FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
+            {
+                if (error) throw error;
+            });
+
+            connection.query('INSERT INTO userbudget VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [userId,numberOfBudgets,sqlC[0], sqlA[0], sqlC[1], sqlA[1], sqlC[2], sqlA[2], sqlC[3], sqlA[3], sqlC[4], sqlA[4], sqlC[5], sqlA[5], sqlC[6], sqlA[6], sqlC[7], sqlA[7], sqlC[8], sqlA[8], sqlC[9], sqlA[9], sqlC[10], sqlA[10], sqlC[11], sqlA[11]], function (error, results, fields) {
+            if (error) throw error;});
+        }
+        res.json({ message: 'Data received successfully on the server.' });
+
+    }); 
+
+    } catch (error) {
+      // Handle the case where the token is invalid
+      console.error('Error decoding JWT token:', error);
+      res.status(401).json({ error: 'Unauthorized - Invalid JWT token' });
+    }
   });
 
   app.post('/api/addexpense', jwtMW, (req, res) => {
-    const { title, budget, tag } = req.body;
+    // Extract JWT token from the request headers
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader ? authorizationHeader.split(' ')[1] : null;
   
-    // Process the form data (e.g., save to a database, etc.)
-    console.log('Received form data:');
-    console.log('Title:', title);
-    console.log('Budget:', budget);
-    console.log('Tag:', tag);
+    if (!token) {
+      // Handle the case where there's no token
+      return res.status(401).json({ error: 'Unauthorized - No JWT token provided' });
+    }
   
-    // Send a response (you can customize this based on your needs)
-    res.json({ message: 'Form data received successfully' });
+    try {
+      // Verify the JWT token
+      const decoded = jwt.verify(token, secretKey); // Replace with your actual secret key
+  
+      // Now, you can access the user information from the decoded token
+      const userId = decoded.id;
+      console.log('User ID:', userId);
+
+  
+      // Continue processing the form data
+      const { title, budget, tag } = req.body;
+      console.log('Received form data:');
+      console.log('Title:', title);
+      console.log('Budget:', budget);
+      console.log('Tag:', tag);
+  
+      // Send a response
+      res.json({ message: 'Form data received successfully' });
+    } catch (error) {
+      // Handle the case where the token is invalid
+      console.error('Error decoding JWT token:', error);
+      res.status(401).json({ error: 'Unauthorized - Invalid JWT token' });
+    }
   });
+  
