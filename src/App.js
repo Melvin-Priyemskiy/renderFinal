@@ -9,6 +9,7 @@ import LoginPage from './LoginPage/LoginPage'
 import CreateAccountPage from './CreateAccountPage/CreateAccountPage'
 import BudgetPage from './BudgetPage/BudgetPage'
 import DashboardPage from './DashboardPage/DashboardPage'
+import LandingPage from './LandingPage/LandingPage'
 
 
 
@@ -27,8 +28,8 @@ import {
 
 function App() {
   return (
-    <Router>
-  <Menu></Menu>
+   <Router>
+    <Menu></Menu>
   <Hero></Hero>
 
   <div className='mainContainer'>
@@ -38,7 +39,8 @@ function App() {
     <Route path='/createaccount' element={<CreateAccountPage/>} />
     <Route path='/dashboard' element={<DashboardPage/>} />
     <Route path='/budgetpage' element={<BudgetPage/>} />
-    <Route path='/' element={<HomePage/>} />
+    <Route path='/homepage' element={<HomePage/>} />
+    <Route path='/' element={<LandingPage/>} />
 
     </Routes>
   </div>

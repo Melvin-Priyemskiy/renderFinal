@@ -9,6 +9,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended : true}));
 const mysql = require('mysql');
 
+const jwt = require('jsonwebtoken');
+const { expressjwt: exjwt } = require('express-jwt');
+const secretKey = 'My super secret key';
+
+const jwtMW = exjwt({
+    secret: secretKey,
+    algorithms: ['HS256']
+});
+
 var connection = mysql.createConnection({
     host: 'sql5.freemysqlhosting.net',
     user: 'sql5669074',
@@ -35,6 +44,35 @@ const budget = {
     ]
 };
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-type,Authorization');
+    next();
+})
+
+app.get('/api/menu', jwtMW, (req, res) => {
+    console.log(req);
+    res.json({
+        success:true,
+        myContent: 'Secret content that only logged in people can see.'
+    });
+});
+
+app.use(function (err, req, res, next) {
+    console.log(err.name === 'UnauthorizedError');
+    console.log(err);
+    if (err.name === 'UnauthorizedError') {
+        res.status(401).json({
+            success:false,
+            officialError: err,
+            err: "Username or password is wrong2"
+        });
+    }
+    else{
+        next(err);
+    }
+});
+
 app.get('/budget', (req, res) => {
     res.json(budget);
 });
@@ -42,7 +80,6 @@ app.get('/budget', (req, res) => {
 app.listen(port, () => {
     console.log(`API served at http://localhost:${port}`);
 });
-
 
 
 app.get('/', async (req, res) => {
@@ -109,12 +146,14 @@ app.post('/api/loginpage', (req, res) => {
         console.log(results[0]);
 
         var credientalsFalse = true;
+        var dbID = 0
 
         for (let i = 0; i < results.length; i++) {
             var dbUsername = results[i].username;
             var dbPassword = results[i].password;
             if(dbUsername == username && dbPassword == password)
             {
+                dbID = results[i].id;
                 credientalsFalse = false;         
             }
         }
@@ -122,14 +161,17 @@ app.post('/api/loginpage', (req, res) => {
         {    res.status(401).json({
             success: false,
             message: 'Invalid username or password',
+            token: null
           });
         }
         else{
             //implement the token to push it to the front end
+            let token = jwt.sign({id: dbID, username: username }, secretKey, {expiresIn: '3m'});
             res.json({
                 success: true,
-                message: 'Login successful'
-              });   
+                message: 'Login successful',
+                token: token
+            });
         }
     });
 });

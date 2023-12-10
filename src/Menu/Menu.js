@@ -5,8 +5,13 @@ import {
   Link,
   Routes
 } from "react-router-dom";
+import axios from 'axios';
 
-function Menu() {
+
+
+function Menu() {  
+  var loggedIn = false;
+
   return (
     <nav
       role="navigation"
@@ -14,16 +19,17 @@ function Menu() {
       itemScope
       itemType="https://schema.org/SiteNavigationElement"
     >
-        <ul>
+        {/* <ul>
             <li><Link itemProp="url" to="/">Home</Link></li>
             <li><Link itemProp="url" to="/about">About</Link></li>
-            <li><Link itemProp="url" to="/login">Login</Link></li>
-            <li><Link itemProp="url" to="/createaccount">Create Account</Link></li>
+            <li><Link itemProp="url" to="/login">Logout</Link></li>
             <li><Link itemProp="url" to="/dashboard">Dashboard</Link></li>
             <li><Link itemProp="url" to="/budgetpage">Budget</Link></li>
-        </ul>
+        </ul> */}
     </nav>
   );
 }
+
+
 
 export default Menu;

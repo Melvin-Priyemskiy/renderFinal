@@ -5,6 +5,8 @@ function CreateAccountPage() {
 
     const navigate = useNavigate();
 
+    function LandingPage(){navigate('/');}
+
     var token ='';
     function CreateAccount(){
       const data = {
@@ -27,6 +29,9 @@ function CreateAccountPage() {
 <div class="container-fluid">
 
 <h1 class="row">Create Account</h1>
+<div>
+        <button onClick={LandingPage}>Back to Landing</button>
+    </div>
 <main>
     <div class="row">
         <label for="username">Username</label>

@@ -1,10 +1,20 @@
 import { Chart } from 'chart.js/auto'; 
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 function HomePage() {
+    const navigate = useNavigate();
+
+    function LandingPage(){navigate('/');}
+
+
   return (
     <main class="center" id="main">
 
+        <div>
+        <button onClick={LandingPage}>Back to Landing</button>
+        </div>
         <div class="page-area">
 
             <article>
@@ -75,50 +85,51 @@ function HomePage() {
   );
   
 }
-var dataSource = {
-    datasets: [
-        {
-            data: [
-               30, 350, 90
-            ],
-            backgroundColor: [
-                '#ffcd56',
-                '#ff6384',
-                '#36a2eb',
 
-            ],
-        }
-    ],
-    labels: [
-        'Eat out', 
-        'Rent',
-        'Groceries'
-    ]
-};
+// var dataSource = {
+//     datasets: [
+//         {
+//             data: [
+//                30, 350, 90
+//             ],
+//             backgroundColor: [
+//                 '#ffcd56',
+//                 '#ff6384',
+//                 '#36a2eb',
 
-function createChart() {
-    var ctx = document.getElementById("myChart").getContext("2d");
-    var myPieChart = new Chart(ctx, {
-        type: 'pie',
-        data: dataSource 
-    });
-}
-// createChart();
+//             ],
+//         }
+//     ],
+//     labels: [
+//         'Eat out', 
+//         'Rent',
+//         'Groceries'
+//     ]
+// };
 
-function getBudget(){
-    axios.get('/budget.json')
-    .then(function(res)
-    {
-        console.log(res.data);
-        for(var i = 0; i < res.data.myBudget.length; i++)
-        {
-            dataSource.datasets[0].data[i] = res.data.myBudget[i].budget;
-            dataSource.labels[i] = res.data.myBudget[i].title;
-        }
-        createChart();
-    });
-}
-getBudget();
+// function createChart() {
+//     var ctx = document.getElementById("myChart").getContext("2d");
+//     var myPieChart = new Chart(ctx, {
+//         type: 'pie',
+//         data: dataSource 
+//     });
+// }
+// // createChart();
+
+// function getBudget(){
+//     axios.get('/budget.json')
+//     .then(function(res)
+//     {
+//         console.log(res.data);
+//         for(var i = 0; i < res.data.myBudget.length; i++)
+//         {
+//             dataSource.datasets[0].data[i] = res.data.myBudget[i].budget;
+//             dataSource.labels[i] = res.data.myBudget[i].title;
+//         }
+//         createChart();
+//     });
+// }
+// getBudget();
 
 
 export default HomePage;
