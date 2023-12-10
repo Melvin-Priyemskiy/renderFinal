@@ -117,7 +117,7 @@ function ExpensePage() {
         </select>
 
         {/* Budget Field */}
-        <label htmlFor="budget">Budget:</label>
+        <label htmlFor="budget">Expenses:</label>
         <input
           type="number"
           id="budget"

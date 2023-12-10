@@ -110,7 +110,7 @@ app.post('/api/createaccount', (req, res) => {
 
     connection.query('SELECT * FROM users', function (error, results, fields) {
         if (error) throw error;
-        console.log("length is this: " + results.length);
+        //console.log("length is this: " + results.length);
         console.log(results[0]);
 
         for (let i = 0; i < results.length; i++) {
@@ -143,8 +143,8 @@ app.post('/api/loginpage', (req, res) => {
     connection.query('SELECT * FROM users', function (error, results, fields) 
     {
         if (error) throw error;
-        console.log("length is this: " + results.length);
-        console.log(results[0]);
+        //console.log("length is this: " + results.length);
+        //console.log(results[0]);
 
         var credientalsFalse = true;
         var dbID = 0
@@ -285,7 +285,17 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
       console.log('Tag:', tag);
   
       // Send a response
-      res.json({ message: 'Form data received successfully' });
+
+
+    //add expenses to the table
+    connection.query('INSERT INTO budget VALUES (?, ?, ?, ?)', [userId, title, budget, tag], function (error, results, fields) {
+        if (error) throw error;
+    });   
+    res.json({ message: 'Form data received successfully' });
+
+
+
+
     } catch (error) {
       // Handle the case where the token is invalid
       console.error('Error decoding JWT token:', error);
@@ -359,4 +369,127 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
     }
   
   });
+
+
+  app.get('/api/getAll', jwtMW, (req, res) => {
+    // Extract JWT token from the request headers
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader ? authorizationHeader.split(' ')[1] : null;
+  
+    if (!token) {
+      // Handle the case where there's no token
+      return res.status(401).json({ error: 'Unauthorized - No JWT token provided' });
+    }
+  
+    try 
+    {
+      // Verify the JWT token
+      const decoded = jwt.verify(token, secretKey); 
+      const userId = decoded.id;
+      console.log('User ID:', userId);
+  
+
+
+        var value;
+      //nested connection query
+
+      connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
+      {
+          if (error) throw error;
+          var size = results[0].size
+          var initialValue = ''; 
+          //console.log('hi')
+          var categoryArray = new Array(12).fill(initialValue);
+          var reducedCatagoryArray = new Array(size).fill(initialValue);
+          var expense = new Array(12).fill(initialValue);
+          var reducedBudget = new Array(size).fill(initialValue);
+
+          if(results.length > 1)
+          { res.status(400).json({ error: 'configure your budget again' });}
+
+            categoryArray[0] = results[0].catagory1 
+            categoryArray[1] = results[0].catagory2
+            categoryArray[2] = results[0].catagory3
+            categoryArray[3] = results[0].catagory4
+            categoryArray[4] = results[0].catagory5
+            categoryArray[5] = results[0].catagory6
+            categoryArray[6] = results[0].catagory7
+            categoryArray[7] = results[0].catagory8
+            categoryArray[8] = results[0].catagory9
+            categoryArray[9] = results[0].catagory10
+            categoryArray[10] = results[0].catagory11
+            categoryArray[11] = results[0].catagory12
+            
+            expense[0] = results[0].budget1
+            expense[1] = results[0].budget2
+            expense[2] = results[0].budget3
+            expense[3] = results[0].budget4
+            expense[4] = results[0].budget5
+            expense[5] = results[0].budget6
+            expense[6] = results[0].budget7
+            expense[7] = results[0].budget8
+            expense[8] = results[0].budget9
+            expense[9] = results[0].budget10
+            expense[10] = results[0].budget11
+            expense[11] = results[0].budget12
+
+        for (var i = 0; i < size; i ++) 
+        {
+           reducedCatagoryArray[i] = categoryArray[i].toLowerCase()
+           reducedBudget[i] =  expense[i]   
+        }
+          console.log("res catagory: ",reducedCatagoryArray)
+          console.log("res expense: ",reducedBudget)
+
+
+        //got the budget, now I need to get all the expenses made by the user
+          connection.query('SELECT * FROM budget WHERE id = (?)', [userId], function (err, resp, fields) 
+          {
+            if (error) throw error;
+            console.log(resp)
+            var respSize = resp.length
+            const expenses = [];
+
+            for (const item of resp) {
+                expenses.push({
+                  title: item.title,
+                  budget: item.budget,
+                  tag: item.tag
+                });
+              }
+
+              const filteredExpenses = expenses.filter((expense) =>
+              reducedCatagoryArray.some((category) => category.toLowerCase() === expense.title.toLowerCase())
+              );
+            
+          //  console.log("filtered: ",filteredExpenses);
+              
+            
+           // console.log("expenses: ", expenses);
+
+            res.json(
+                { 
+                    success: true,
+                    message: 'Budget information  good sent successfully',
+                    catagory: reducedCatagoryArray, 
+                    budget: reducedBudget,
+                    expense: filteredExpenses
+                });
+          });
+      });
+
+
+
+
+    }
+
+     catch (error) 
+    {
+      // Handle the case where the token is invalid
+      console.error('Error decoding JWT token:', error);
+      res.status(401).json({ error: 'Unauthorized - Invalid JWT token' });
+    }
+  
+  });
+
   
