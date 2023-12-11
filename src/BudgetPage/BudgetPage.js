@@ -105,6 +105,8 @@ const BudgetPage = () => {
         );
 
         console.log('API response:', response.data);
+        navigate('/dashboard');
+
       } catch (error) {
         console.error('Error sending POST request:', error);
       }

@@ -192,7 +192,7 @@ app.post('/api/loginpage', (req, res) => {
         }
         else{
             //implement the token to push it to the front end
-            let token = jwt.sign({id: dbID, username: username }, secretKey, {expiresIn: '100m'});
+            let token = jwt.sign({id: dbID, username: username }, secretKey, {expiresIn: '1m'});
             res.json({
                 success: true,
                 message: 'Login successful',
