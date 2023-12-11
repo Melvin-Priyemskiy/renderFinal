@@ -27,22 +27,7 @@ var connection = mysql.createConnection({
 
 app.use(cors());
 
-const budget = {
-    myBudget: [
-        {
-            title: 'Eat out',
-            budget: 25
-        },
-        {
-            title: 'Rent',
-            budget: 275
-        },
-        {
-            title: 'Grocery',
-            budget: 110
-        },
-    ]
-};
+
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -73,9 +58,6 @@ app.use(function (err, req, res, next) {
     }
 });
 
-app.get('/budget', (req, res) => {
-    res.json(budget);
-});
 
 app.listen(port, () => {
     console.log(`API served at http://localhost:${port}`);
