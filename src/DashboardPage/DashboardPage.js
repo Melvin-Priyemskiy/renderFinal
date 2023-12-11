@@ -8,6 +8,8 @@ function DashboardPage() {
   const chartRef = useRef(null);
   const pieChartRef = useRef(null);
   const budgetPieChartRef = useRef(null);
+  const doughnutChartRef = useRef(null); // Added for the new doughnut chart
+  const expensesDoughnutChartRef = useRef(null); // Added for the new expenses doughnut chart
   const [budgetInfo, setBudgetInfo] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState('');
 
@@ -20,20 +22,22 @@ function DashboardPage() {
           'Authorization': `Bearer ${token}`
         }
       })
-      .then(response => {
-        var budgetArray = response.data.budget;
-        var categoryArray = response.data.catagory;
-        var expenses = response.data.expense;
+        .then(response => {
+          var budgetArray = response.data.budget;
+          var categoryArray = response.data.catagory;
+          var expenses = response.data.expense;
 
-        setBudgetInfo(budgetArray);
+          setBudgetInfo(budgetArray);
 
-        createChart(chartRef.current, categoryArray, budgetArray, expenses, selectedMonth);
-        createPieChart(pieChartRef.current, categoryArray, expenses, selectedMonth);
-        createBudgetPieChart(budgetPieChartRef.current, categoryArray, budgetArray);
-      })
-      .catch(error => {
-        console.error('Error fetching budget information:', error);
-      });
+          createChart(chartRef.current, categoryArray, budgetArray, expenses, selectedMonth);
+          createPieChart(pieChartRef.current, categoryArray, expenses, selectedMonth);
+          createBudgetPieChart(budgetPieChartRef.current, categoryArray, budgetArray);
+          createDoughnutChart(doughnutChartRef.current, budgetArray, expenses, selectedMonth);
+          createExpensesDoughnutChart(expensesDoughnutChartRef.current, categoryArray, expenses, selectedMonth);
+        })
+        .catch(error => {
+          console.error('Error fetching budget information:', error);
+        });
     }
   }, [selectedMonth]);
 
@@ -53,7 +57,7 @@ function DashboardPage() {
         <button onClick={() => navigate('/budgetpage')}>Configure Budget</button>
         <button onClick={() => navigate('/expensepage')}>Add Expenses</button>
       </div>
-  
+
       <div>
         <h2>Budget Information</h2>
         <ul>
@@ -62,7 +66,7 @@ function DashboardPage() {
           ))}
         </ul>
       </div>
-  
+
       <label>Select Month:</label>
       <select onChange={handleMonthChange} value={selectedMonth}>
         <option value="">All Months</option>
@@ -72,18 +76,109 @@ function DashboardPage() {
           </option>
         ))}
       </select>
-  
+
       <h2 style={{ textAlign: 'center' }}>Budget vs Expenses</h2>
       <canvas id="budgetExpenseChart" ref={chartRef} width="800" height="400"></canvas>
-  
+
       <h2 style={{ textAlign: 'center' }}>Expenses Breakdown</h2>
       <canvas id="expensePieChart" ref={pieChartRef} width="400" height="400"></canvas>
-  
+
       <h2 style={{ textAlign: 'center' }}>Budget Breakdown</h2>
       <canvas id="budgetPieChart" ref={budgetPieChartRef} width="400" height="400"></canvas>
+
+      {/* New Doughnut Chart */}
+      <h2 style={{ textAlign: 'center' }}>Doughnut Chart: Expenses vs Budget</h2>
+      <canvas id="doughnutChart" ref={doughnutChartRef} width="400" height="400"></canvas>
+
+      {/* New Expenses Doughnut Chart */}
+      <h2 style={{ textAlign: 'center' }}>Expenses Doughnut Chart</h2>
+      <canvas id="expensesDoughnutChart" ref={expensesDoughnutChartRef} width="400" height="400"></canvas>
     </div>
   );
-  
+}
+
+function createExpensesDoughnutChart(chartRef, categories, expenses, selectedMonth) {
+  if (!chartRef) return;
+
+  const ctx = chartRef.getContext('2d');
+
+  if (ctx.chart) {
+    ctx.chart.destroy();
+  }
+
+  const expenseLabels = categories;
+  const filteredExpenses = selectedMonth
+    ? expenses.filter(expense => expense.tag === selectedMonth)
+    : expenses;
+
+  const expenseData = [];
+  for (let i = 0; i < expenseLabels.length; i++) {
+    const category = expenseLabels[i];
+    const totalExpense = filteredExpenses
+      .filter(expense => expense.title === category)
+      .reduce((sum, expense) => sum + expense.budget, 0);
+
+    expenseData.push(totalExpense);
+  }
+
+  const newExpensesDoughnutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: expenseLabels,
+      datasets: [{
+        data: expenseData,
+        backgroundColor: getRandomColors(expenseLabels.length),
+      }],
+    },
+  });
+
+  ctx.chart = newExpensesDoughnutChart;
+}
+
+function createDoughnutChart(chartRef, budget, expenses, selectedMonth) {
+  if (!chartRef) return;
+
+  const ctx = chartRef.getContext('2d');
+
+  if (ctx.chart) {
+    ctx.chart.destroy();
+  }
+
+  const budgetLabels = budget.map((item, index) => `Category ${index + 1}`);
+  const budgetData = budget;
+
+  const filteredExpenses = selectedMonth
+    ? expenses.filter(expense => expense.tag === selectedMonth)
+    : expenses;
+
+  const organizedExpenseData = [];
+  for (let i = 0; i < budgetLabels.length; i++) {
+    const category = budgetLabels[i];
+    const totalExpense = filteredExpenses
+      .filter(expense => expense.title === category)
+      .reduce((sum, expense) => sum + expense.budget, 0);
+
+    organizedExpenseData.push(totalExpense);
+  }
+
+  const newDoughnutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: budgetLabels,
+      datasets: [
+        {
+          data: budgetData,
+          backgroundColor: getRandomColors(budgetLabels.length),
+        },
+        {
+          data: organizedExpenseData,
+          backgroundColor: getRandomColors(budgetLabels.length),
+        },
+      ],
+    },
+  });
+
+  ctx.chart = newDoughnutChart;
 }
 
 function createChart(chartRef, categories, budget, expenses, selectedMonth) {
