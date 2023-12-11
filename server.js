@@ -326,6 +326,12 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
       connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
       {
           if (error) throw error;
+          console.log("The error is ocurring here: ",results)
+          if(results.length == 0)
+          { 
+            res.status(400).json({ error: 'no budget created' });
+            return;
+        }
           var size = results[0].size
           var initialValue = ''; 
           //console.log('hi')
