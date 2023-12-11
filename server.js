@@ -35,13 +35,6 @@ app.use((req, res, next) => {
     next();
 })
 
-app.get('/api/menu', jwtMW, (req, res) => {
-    console.log(req);
-    res.json({
-        success:true,
-        myContent: 'Secret content that only logged in people can see.'
-    });
-});
 
 app.use(function (err, req, res, next) {
     console.log(err.name === 'UnauthorizedError');
@@ -64,21 +57,6 @@ app.listen(port, () => {
 });
 
 
-app.get('/', async (req, res) => {
-     connection.query('SELECT * FROM budget', function (error, results, fields) {
-         connection.end();
-         if (error)
-         {
-            return res.status(409).json({
-                success: false,
-                message: 'db not connecting try again',
-                error: error
-              });  
-         } 
-         res.json(results)
- 
-     });
- });
 
 
 app.post('/api/createaccount', (req, res) => {
