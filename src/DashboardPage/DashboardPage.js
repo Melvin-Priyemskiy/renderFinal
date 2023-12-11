@@ -6,10 +6,11 @@ import { Chart } from 'chart.js';
 function DashboardPage() {
   const navigate = useNavigate();
   const chartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const budgetPieChartRef = useRef(null);
   const [budgetInfo, setBudgetInfo] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState('');
 
-  // Fetch budget information on component mount
   useEffect(() => {
     const token = localStorage.getItem('jwt');
 
@@ -20,29 +21,26 @@ function DashboardPage() {
         }
       })
       .then(response => {
-        // Divide up the response
         var budgetArray = response.data.budget;
-        var catagoryArray = response.data.catagory;
+        var categoryArray = response.data.catagory;
         var expenses = response.data.expense;
 
-        // Set budget info state
         setBudgetInfo(budgetArray);
 
-        // Create or update the chart
-        createChart(chartRef.current, catagoryArray, budgetArray, expenses, selectedMonth);
+        createChart(chartRef.current, categoryArray, budgetArray, expenses, selectedMonth);
+        createPieChart(pieChartRef.current, categoryArray, expenses, selectedMonth);
+        createBudgetPieChart(budgetPieChartRef.current, categoryArray, budgetArray);
       })
       .catch(error => {
         console.error('Error fetching budget information:', error);
       });
     }
-  }, [selectedMonth]); // Update the chart when the selected month changes
+  }, [selectedMonth]);
 
-  // Function to handle month selection
   const handleMonthChange = (event) => {
     setSelectedMonth(event.target.value);
   };
 
-  // Create an array of all months
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -55,7 +53,7 @@ function DashboardPage() {
         <button onClick={() => navigate('/budgetpage')}>Configure Budget</button>
         <button onClick={() => navigate('/expensepage')}>Add Expenses</button>
       </div>
-
+  
       <div>
         <h2>Budget Information</h2>
         <ul>
@@ -64,20 +62,28 @@ function DashboardPage() {
           ))}
         </ul>
       </div>
-
-      {/* Dropdown for month selection */}
+  
       <label>Select Month:</label>
       <select onChange={handleMonthChange} value={selectedMonth}>
         <option value="">All Months</option>
         {months.map((month, index) => (
-          <option key={index} value={month}>{month}</option>
+          <option key={index} value={month}>
+            {month}
+          </option>
         ))}
       </select>
-
-      {/* Chart canvas */}
+  
+      <h2 style={{ textAlign: 'center' }}>Budget vs Expenses</h2>
       <canvas id="budgetExpenseChart" ref={chartRef} width="800" height="400"></canvas>
+  
+      <h2 style={{ textAlign: 'center' }}>Expenses Breakdown</h2>
+      <canvas id="expensePieChart" ref={pieChartRef} width="400" height="400"></canvas>
+  
+      <h2 style={{ textAlign: 'center' }}>Budget Breakdown</h2>
+      <canvas id="budgetPieChart" ref={budgetPieChartRef} width="400" height="400"></canvas>
     </div>
   );
+  
 }
 
 function createChart(chartRef, categories, budget, expenses, selectedMonth) {
@@ -85,24 +91,17 @@ function createChart(chartRef, categories, budget, expenses, selectedMonth) {
 
   const ctx = chartRef.getContext('2d');
 
-  // Check if a chart instance already exists
   if (ctx.chart) {
-    // Destroy the existing chart instance
     ctx.chart.destroy();
   }
 
-  // Prepare data
   const budgetLabels = categories;
   const budgetData = budget;
 
-  // Filter expenses based on the selected month or show all months if none selected
   const filteredExpenses = selectedMonth
     ? expenses.filter(expense => expense.tag === selectedMonth)
     : expenses;
 
-  console.log('Filtered Expenses:', filteredExpenses);
-
-  // Use accumulated expense data for the selected month(s)
   const organizedExpenseData = [];
   for (let i = 0; i < budgetLabels.length; i++) {
     const category = budgetLabels[i];
@@ -113,9 +112,6 @@ function createChart(chartRef, categories, budget, expenses, selectedMonth) {
     organizedExpenseData.push(totalExpense);
   }
 
-  console.log('Organized Expense Data:', organizedExpenseData);
-
-  // Create the chart
   const newChart = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -146,10 +142,87 @@ function createChart(chartRef, categories, budget, expenses, selectedMonth) {
     },
   });
 
-  // Attach the new chart instance to the canvas element
   ctx.chart = newChart;
 }
 
+function createPieChart(chartRef, categories, expenses, selectedMonth) {
+  if (!chartRef) return;
 
+  const ctx = chartRef.getContext('2d');
+
+  if (ctx.chart) {
+    ctx.chart.destroy();
+  }
+
+  const filteredExpenses = selectedMonth
+    ? expenses.filter(expense => expense.tag === selectedMonth)
+    : expenses;
+
+  const expenseLabels = categories;
+  const expenseData = [];
+
+  for (let i = 0; i < expenseLabels.length; i++) {
+    const category = expenseLabels[i];
+    const totalExpense = filteredExpenses
+      .filter(expense => expense.title === category)
+      .reduce((sum, expense) => sum + expense.budget, 0);
+
+    expenseData.push(totalExpense);
+  }
+
+  const newPieChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: expenseLabels,
+      datasets: [{
+        data: expenseData,
+        backgroundColor: getRandomColors(expenseLabels.length),
+      }],
+    },
+  });
+
+  ctx.chart = newPieChart;
+}
+
+function createBudgetPieChart(chartRef, categories, budget) {
+  if (!chartRef) return;
+
+  const ctx = chartRef.getContext('2d');
+
+  if (ctx.chart) {
+    ctx.chart.destroy();
+  }
+
+  const budgetLabels = categories;
+  const budgetData = budget;
+
+  const newPieChart = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: budgetLabels,
+      datasets: [{
+        data: budgetData,
+        backgroundColor: getRandomColors(budgetLabels.length),
+      }],
+    },
+  });
+
+  ctx.chart = newPieChart;
+}
+
+function getRandomColors(count) {
+  const colors = [];
+
+  for (let i = 0; i < count; i++) {
+    const color = `rgba(${getRandomValue()}, ${getRandomValue()}, ${getRandomValue()}, 0.8)`;
+    colors.push(color);
+  }
+
+  return colors;
+}
+
+function getRandomValue() {
+  return Math.floor(Math.random() * 256);
+}
 
 export default DashboardPage;

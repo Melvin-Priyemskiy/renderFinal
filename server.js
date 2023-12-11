@@ -85,7 +85,14 @@ app.listen(port, () => {
 app.get('/', async (req, res) => {
      connection.query('SELECT * FROM budget', function (error, results, fields) {
          connection.end();
-         if (error) throw error;
+         if (error)
+         {
+            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+                error: error
+              });  
+         } 
          res.json(results)
  
      });
@@ -109,7 +116,13 @@ app.post('/api/createaccount', (req, res) => {
     console.log('This is me',username, password);
 
     connection.query('SELECT * FROM users', function (error, results, fields) {
-        if (error) throw error;
+        if (error) 
+        {
+            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+              });  
+        }
         //console.log("length is this: " + results.length);
         console.log(results[0]);
 
@@ -131,7 +144,12 @@ app.post('/api/createaccount', (req, res) => {
     });
 
     connection.query('INSERT INTO users VALUES ("", ?, ?)', [username, password], function (error, results, fields) {
-          if (error) throw error;
+          if (error) 
+          {            return res.status(409).json({
+            success: false,
+            message: 'db not connecting try again',
+            error: error
+          });  }
       });    
 
 });
@@ -142,7 +160,14 @@ app.post('/api/loginpage', (req, res) => {
 
     connection.query('SELECT * FROM users', function (error, results, fields) 
     {
-        if (error) throw error;
+        if (error)
+        {
+            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+                error: error
+              });  
+        } 
         //console.log("length is this: " + results.length);
         //console.log(results[0]);
 
@@ -222,7 +247,13 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
       // Send a response (adjust as needed)
 
       connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) {
-        if (error) throw error;
+        if (error){
+            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+                error: error
+              });  
+        } 
         console.log(typeof results); // Outputs: 'string'
         console.log(Object.keys(results).length === 0); // Outputs: true
         var objisEmpty = Object.keys(results).length
@@ -231,7 +262,9 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
         {
                 connection.query('INSERT INTO userbudget VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                  [userId,numberOfBudgets,sqlC[0], sqlA[0], sqlC[1], sqlA[1], sqlC[2], sqlA[2], sqlC[3], sqlA[3], sqlC[4], sqlA[4], sqlC[5], sqlA[5], sqlC[6], sqlA[6], sqlC[7], sqlA[7], sqlC[8], sqlA[8], sqlC[9], sqlA[9], sqlC[10], sqlA[10], sqlC[11], sqlA[11]], function (error, results, fields) {
-          if (error) throw error;
+          if (error){
+
+          } 
       });   
         }
         else{
@@ -240,12 +273,22 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
 
             connection.query('DELETE FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
             {
-                if (error) throw error;
+                if (error) {            return res.status(409).json({
+                    success: false,
+                    message: 'db not connecting try again',
+                    error: error
+                  });  }
             });
 
             connection.query('INSERT INTO userbudget VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [userId,numberOfBudgets,sqlC[0], sqlA[0], sqlC[1], sqlA[1], sqlC[2], sqlA[2], sqlC[3], sqlA[3], sqlC[4], sqlA[4], sqlC[5], sqlA[5], sqlC[6], sqlA[6], sqlC[7], sqlA[7], sqlC[8], sqlA[8], sqlC[9], sqlA[9], sqlC[10], sqlA[10], sqlC[11], sqlA[11]], function (error, results, fields) {
-            if (error) throw error;});
+            if (error) 
+            {            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+                error: error
+              });  }
+        });
         }
         res.json({ message: 'Data received successfully on the server.' });
 
@@ -289,7 +332,11 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
 
     //add expenses to the table
     connection.query('INSERT INTO budget VALUES (?, ?, ?, ?)', [userId, title, budget, tag], function (error, results, fields) {
-        if (error) throw error;
+        if (error){            return res.status(409).json({
+            success: false,
+            message: 'db not connecting try again',
+            error: error
+          });  }
     });   
     res.json({ message: 'Form data received successfully' });
 
@@ -325,7 +372,13 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
       //extract the budget from the db 
       connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
       {
-          if (error) throw error;
+          if (error) {
+            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+                error: error
+              });  
+          }
           console.log("The error is ocurring here: ",results)
           if(results.length == 0)
           { 
@@ -401,7 +454,11 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
 
       connection.query('SELECT * FROM userbudget WHERE id = (?)', [userId], function (error, results, fields) 
       {
-          if (error) throw error;
+          if (error) {            return res.status(409).json({
+            success: false,
+            message: 'db not connecting try again',
+            error: error
+          });  }
           console.log("The error is ocurring here: ",results)
           if(results.length == 0)
           { 
@@ -457,7 +514,11 @@ app.post('/api/makebudget', jwtMW, (req, res) => {
         //got the budget, now I need to get all the expenses made by the user
           connection.query('SELECT * FROM budget WHERE id = (?)', [userId], function (err, resp, fields) 
           {
-            if (error) throw error;
+            if (error){            return res.status(409).json({
+                success: false,
+                message: 'db not connecting try again',
+                error: error
+              });  }
             console.log(resp)
             var respSize = resp.length
             const expenses = [];
