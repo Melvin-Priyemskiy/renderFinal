@@ -94,7 +94,7 @@ const BudgetPage = () => {
         }));
 
         const response = await axios.post(
-          'http://localhost:3001/api/makebudget',
+          'https://backendapi-f7yb.onrender.com/api/makebudget',
           { formData: roundedCategories }, // Adjust the data being sent to the API as needed
           {
             headers: {

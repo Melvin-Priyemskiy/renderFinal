@@ -15,7 +15,7 @@ function CreateAccountPage() {
       };
       console.log(data)
   
-      axios.post('http://localhost:3001/api/createaccount', data).then((response) => {
+      axios.post('https://backendapi-f7yb.onrender.com/api/createaccount', data).then((response) => {
           navigate('/login');
         console.log(response);
       }, (error) => {

@@ -261,7 +261,7 @@ function DashboardPage() {
     const token = localStorage.getItem('jwt');
 
     if (token) {
-      axios.get('http://localhost:3001/api/getAll', {
+      axios.get('https://backendapi-f7yb.onrender.com/api/getAll', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

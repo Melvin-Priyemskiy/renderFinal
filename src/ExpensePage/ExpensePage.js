@@ -28,7 +28,7 @@ function ExpensePage() {
     const token = localStorage.getItem('jwt');
 
     if (token) {
-      axios.get('http://localhost:3001/api/getbudget', {
+      axios.get('https://backendapi-f7yb.onrender.com/api/getbudget', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -73,7 +73,7 @@ function ExpensePage() {
       }
 
       const response = await axios.post(
-        'http://localhost:3001/api/addexpense',
+        'https://backendapi-f7yb.onrender.com/api/addexpense',
         {
           title: title,
           budget: roundedBudget,
